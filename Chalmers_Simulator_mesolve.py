@@ -43,7 +43,7 @@ cos = np.cos
 exp = np.exp
 
 
-def create_system_Hamiltonian(num_qubits, num_levels, Paulis_gt, CZ_gt, Alp, Diss=[],
+def create_system_Hamiltonian(num_qubits, num_levels, Paulis_gt, CZ_gt, CCZS_gt, Alp, Diss=[],
                               Deph =[], Texc=[], ZZ_list=[], ZZ_strength=[]):
     
     '''
@@ -54,6 +54,7 @@ def create_system_Hamiltonian(num_qubits, num_levels, Paulis_gt, CZ_gt, Alp, Dis
     num_levels      :   Number of levels
     Paulis_gt       :   Single qubit gate time- Pauli X and Pauli Y
     CZ_gt           :   Gate time for two qubit gate, namely Controlled Z gate
+    CCZS_gt         :   Gate time for three qubit Controlled CZs gate. Refer PRX QUANTUM 2, 040348 (2021).
     Alp             :   Non linearity in each qubit (Presently only homogeneous qubits are supported)
     Diss            :   An array of qubit lifetime (in seconds) of each qubit. len(Diss) must be equal to Nqubits
     Deph            :   An array of coherence time (in seconds) of each qubit. len(Deph) must be equal to Nqubits
@@ -68,11 +69,12 @@ def create_system_Hamiltonian(num_qubits, num_levels, Paulis_gt, CZ_gt, Alp, Dis
     '''
     
     # Defining some global variables which will be used in all the functions
-    global Nqubits, Nlevels, Nqubits, gate_time_Paulis, gate_time_CZ, Alpha, B, anihi_oper
+    global Nqubits, Nlevels, Nqubits, gate_time_Paulis, gate_time_CZ, gate_time_CCZS, Alpha, B, anihi_oper
 
 
     gate_time_Paulis = Paulis_gt
     gate_time_CZ = CZ_gt
+    gate_time_CCZS = CCZS_gt
     Alpha = Alp
     B = pi/gate_time_Paulis
     Nlevels = num_levels
@@ -500,12 +502,37 @@ def pulse_hamiltonians(gate, TC, angle, npoints):
             #detuned_Ham = 0.5*Alpha*anihi_oper[c_index].dag()*anihi_oper[c_index].dag()*anihi_oper[c_index]*anihi_oper[c_index]
             #FHam.append(QobjEvo([-detuned_Ham,[CZ(TC[i][0],TC[i][1]), np.ones(len(tlist))*Pulse_strength]], tlist = tlist))
             TE = gate_time-tlist
-            Expo = Pulse_strength*CZ_expo
-            ExpoC = Pulse_strength*np.conjugate(CZ_expo)     
+            Expo = Pulse_strength*CZ_expo* np.heaviside(TE, 0)
+            ExpoC = Pulse_strength*np.conjugate(CZ_expo)* np.heaviside(TE, 0)
             opera = CZ(TC[i][0],TC[i][1])
             FHam.append(QobjEvo([[opera, Expo], [opera.dag(), ExpoC]], tlist = tlist))
             
         
+        
+        # Controlled CZS three qubit gate
+        elif gate[i] == 'CCZS':
+            Om_CZS = pi/(sqrt(2)*gate_time_CCZS) # Rabi frequency
+            TE = gate_time-tlist
+            
+            Expo = Om_CZS*CZ_expo* np.heaviside(TE, 0)   # CZ_expo is without negative sign so Expo is exp(1j*alpha*t)
+            ExpoC = Om_CZS*np.conjugate(CZ_expo)* np.heaviside(TE, 0)
+            
+            oper1, oper2 = CZS(TC[i][0],TC[i][1],TC[i][2])
+            
+            '''
+            In the next line, we create the QobjEvo in the following manner-
+            oper1 = |110><200| + |111><201|
+            oper2 = |101><200| + |111><210|
+            
+            [exp(1j*alpha*tlist)*oper1] + [exp(-1j*alpha*tlist)*oper1.dag()] ----> levels in which lambda1 acts
+            [exp(1j*alpha*tlist)*oper2] + [exp(-1j*alpha*tlist)*oper2.dag()] ----> levels in which lambda2 acts
+            In this function, lambda1 = lambda2
+                       
+            '''
+            FHam.append(QobjEvo([[oper1, Expo], [oper1.dag(), ExpoC], \
+                                 [oper2, Expo], [oper2.dag(), ExpoC]], tlist = tlist))
+
+               
         
         # Hadamard Gate
         elif gate[i] == 'HD':

@@ -260,10 +260,10 @@ def CZS(control, target1, target2):
     target2        :      second target qubit (q2 in the main article)
     
     Returns-
-    oper_lambda1   :      |110><200| equivalent of the main article 
+    oper_lambda1   :      |110><200| + |111><201| equivalent of the main article 
                           in the total Hilbert space.
                           
-    oper_lambda2   :      |101><200| equivalent of the main article
+    oper_lambda2   :      |101><200| + |111><210| equivalent of the main article
                           in the total Hilbert space.
     
     

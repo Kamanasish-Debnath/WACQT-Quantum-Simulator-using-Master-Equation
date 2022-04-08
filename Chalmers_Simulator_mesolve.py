@@ -49,8 +49,8 @@ print('Pauli Y', '\t\t', 'PY')
 print('Pauli Z', '\t\t', 'PZ')
 print('Hadamard', '\t\t', 'HD')
 print('\n')
-print('Controlled Z', '\t\t', 'CZ')
-print('Controlled CZS', '\t\t', 'CZS')
+print('Controlled Z', '\t\t', 'CZ','\t\t', 'Format:Tar_Con=[[control, target]]')
+print('Controlled CZS', '\t\t', 'CCZS','\t\t', 'Format:Tar_Con=[[control, target1, target2, phi]]')
 
 def create_system_Hamiltonian(num_qubits, num_levels, Paulis_gt, CZ_gt, CCZS_gt, Alp, Diss=[],
                               Deph =[], Texc=[], ZZ_list=[], ZZ_strength=[]):
@@ -464,6 +464,9 @@ def pulse_hamiltonians(gate, TC, angle, npoints):
         elif gate[i] == 'I' or gate[i]=='U':
             Gate_times.append(Pauli_times(0))
             
+        elif gate[i] == 'CCZS':
+            Gate_times.append(gate_time_CCZS)
+            
     max_gate_time = np.max(Gate_times)
     tlist = np.linspace(0, max_gate_time, npoints)
     
@@ -523,8 +526,8 @@ def pulse_hamiltonians(gate, TC, angle, npoints):
             Om_CZS = pi/(sqrt(2)*gate_time_CCZS) # Rabi frequency
             TE = gate_time-tlist
             
-            Expo = Om_CZS*CZ_expo* np.heaviside(TE, 0)   # CZ_expo is without negative sign so Expo is exp(1j*alpha*t)
-            ExpoC = Om_CZS*np.conjugate(CZ_expo)* np.heaviside(TE, 0)
+            Expo = Om_CZS*CZ_expo   # CZ_expo is without negative sign so Expo is exp(1j*alpha*t)
+            ExpoC = Om_CZS*np.conjugate(CZ_expo)
             
             oper1, oper2 = CZS(TC[i][0],TC[i][1],TC[i][2])
             
@@ -538,8 +541,10 @@ def pulse_hamiltonians(gate, TC, angle, npoints):
             In this function, lambda1 = lambda2
                        
             '''
+            phi = TC[i][3]
+            Phi_CCZS = -np.exp(1j*phi)
             FHam.append(QobjEvo([[oper1, Expo], [oper1.dag(), ExpoC], \
-                                 [oper2, Expo], [oper2.dag(), ExpoC]], tlist = tlist))
+                                 [phi*oper2, Expo], [np.conjugate(phi)*oper2.dag(), ExpoC]], tlist = tlist))
 
                
         

@@ -42,6 +42,15 @@ sin = np.sin
 cos = np.cos
 exp = np.exp
 
+print("The quantum gates which are modelled in this code and their notations-")
+print('-'*80,)
+print('Pauli X', '\t\t', 'PX')
+print('Pauli Y', '\t\t', 'PY')
+print('Pauli Z', '\t\t', 'PZ')
+print('Hadamard', '\t\t', 'HD')
+print('\n')
+print('Controlled Z', '\t\t', 'CZ')
+print('Controlled CZS', '\t\t', 'CZS')
 
 def create_system_Hamiltonian(num_qubits, num_levels, Paulis_gt, CZ_gt, CCZS_gt, Alp, Diss=[],
                               Deph =[], Texc=[], ZZ_list=[], ZZ_strength=[]):

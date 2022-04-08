@@ -257,7 +257,7 @@ def CZ(control, target):
     return opera
 
 
-def CZS(control, target1, target2):
+def CCZS(control, target1, target2):
     
     '''
     This function returns the two operators for three qubit gate Controlled CZs 
@@ -526,10 +526,10 @@ def pulse_hamiltonians(gate, TC, angle, npoints):
             Om_CZS = pi/(sqrt(2)*gate_time_CCZS) # Rabi frequency
             TE = gate_time-tlist
             
-            Expo = Om_CZS*CZ_expo   # CZ_expo is without negative sign so Expo is exp(1j*alpha*t)
-            ExpoC = Om_CZS*np.conjugate(CZ_expo)
+            Expo = Om_CZS*CZ_expo*np.heaviside(TE, 0)      # CZ_expo is without negative sign so Expo is exp(1j*alpha*t)
+            ExpoC = Om_CZS*np.conjugate(CZ_expo)*np.heaviside(TE, 0)
             
-            oper1, oper2 = CZS(TC[i][0],TC[i][1],TC[i][2])
+            oper1, oper2 = CCZS(TC[i][0],TC[i][1],TC[i][2])
             
             '''
             In the next line, we create the QobjEvo in the following manner-
@@ -537,8 +537,10 @@ def pulse_hamiltonians(gate, TC, angle, npoints):
             oper2 = |101><200| + |111><210|
             
             [exp(1j*alpha*tlist)*oper1] + [exp(-1j*alpha*tlist)*oper1.dag()] ----> levels in which lambda1 acts
-            [exp(1j*alpha*tlist)*oper2] + [exp(-1j*alpha*tlist)*oper2.dag()] ----> levels in which lambda2 acts
-            In this function, lambda1 = lambda2
+            
+            
+            [exp(i phi)*exp(1j*alpha*tlist)*oper2] + [exp(-i phi)*exp(-1j*alpha*tlist)*oper2.dag()] ----> levels 
+            in which lambda2 acts
                        
             '''
             phi = TC[i][3]

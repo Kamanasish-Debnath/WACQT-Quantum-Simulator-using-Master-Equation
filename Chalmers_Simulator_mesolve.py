@@ -422,7 +422,7 @@ def Final_state(dm, oper):
 
 
 
-def pulse_hamiltonians(gate, TC, angle, npoints):
+def pulse_hamiltonians(gate, TC, angle, npoints, measurement = False):
     
     '''
     QobjEvo function of qutip does not take different time slices (tlist) as inputs, which 
@@ -563,7 +563,7 @@ def pulse_hamiltonians(gate, TC, angle, npoints):
          
         
         # Incase the inputs are unity (only for measurement part)
-        elif gate[i] == 'U' or gate[i] == 'I':
+        elif gate[i] == 'U' and measurement == True:
             unitary_operator = []
             for k in range(Nqubits):
                 unitary_operator.append(qeye(Nlevels))
@@ -571,7 +571,7 @@ def pulse_hamiltonians(gate, TC, angle, npoints):
             FHam.append(QobjEvo([unitary_operator, np.ones(len(tlist))], tlist = tlist))
             
             
-        elif gate[i] == 'PZ':
+        elif gate[i] == 'PZ' and measurement == True:
             unitary_operator = []
             for k in range(Nqubits):
                 unitary_operator.append(qeye(Nlevels))
@@ -645,7 +645,7 @@ def Execute(Hamiltonian, c_ops, Info, Ini, measurement = False, conf_matrix= [])
     
     
     
-def Measurement(Hamiltonian, c_ops, Ini, gate, CM, coeff):
+def Measurement(Hamiltonian, Ini, Info, CM, coeff):
     '''
     This function returns the diagonal elements (population) of the density 
     matrix for a given set of measurement gates and confusion matrix.
@@ -653,7 +653,6 @@ def Measurement(Hamiltonian, c_ops, Ini, gate, CM, coeff):
     
     Arguments-
     Hamiltonian  :  Bare Hamiltonian of the system
-    c_ops        :  List of collapse operators
     Ini          :  Initial state before the measurement process begins
     gate         :  List of gate in the same procedure
     CM           :  Confusion matris in the computational subspace
@@ -668,19 +667,21 @@ def Measurement(Hamiltonian, c_ops, Ini, gate, CM, coeff):
     
     probabilities = []
     
-    for i in range(len(gate)):
+    for i in range(len(Info)):
         
         gate =  np.array(Info[i].name)
         TC   =  np.array(Info[i].Tar_Con)
         angle = np.array(Info[i].angle)
-        npoints = 1000
-        H1, tlist = pulse_hamiltonians(gate, TC, angle, npoints)
+        npoints = 500
+        H1, tlist = pulse_hamiltonians(gate, TC, angle, npoints, measurement = True)
         
         H2 = sum(H1) + Hamiltonian
-        final_dm = mesolve(H2, Ini, tlist, c_ops, e_ops = [], options = Options(store_final_state=True))
+        final_dm = mesolve(H2, Ini, tlist, c_ops = [], e_ops = [], options = Options(store_final_state=True))
         
-        state_in_comp_space = _3to2levels(final_dm)
-        probabilities.append(coeff[i]*CM*state_in_comp_space)
+        state_in_comp_space = _3to2levels(final_dm.final_state)
+        ps = (CM*state_in_comp_space)
+        
+        probabilities.append(coeff[i]*final_pop(ps, gate))
         
     return probabilities
         
@@ -710,19 +711,32 @@ def _3to2levels(dm):
             Prob_array.append(dm[counter, counter])
         counter = counter + 1
     
-    return np.array(Prob_array)
+    Prob_array = np.array(Prob_array)
+    norm = 1/np.sum(Prob_array)
+    return Prob_array
             
+
     
     
+def final_pop(probs, gate):
     
-    
-    
-    
-    
-    
-    
-    
-    
+    ops = []
+    for i in gate:
+        if i=='PX' or i=='PY' or i=='PZ':
+            ops.append(sigmaz())
+            
+        elif i == 'U':
+            ops.append(qeye(2))
+            
+            
+    ops= tensor(ops).diag()
+
+    sum = 0
+    for i, j in enumerate(ops):
+        sum = sum + j*probs[i]
+
+    return sum 
+       
     
 def Time_dynamics(Hamiltonian, c_ops, Info, Ini, e_ops = []):
     '''

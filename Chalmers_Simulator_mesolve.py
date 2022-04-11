@@ -666,6 +666,9 @@ def Measurement(Hamiltonian, Ini, Info, CM, coeff):
         H2 = sum(H1) + Hamiltonian
         final_dm = mesolve(H2, Ini, tlist, c_ops = [], e_ops = [], options = Options(store_final_state=True))
         
+        # This truncates the Hilbert space and returns the final state in the computational subspace. 
+        # No normalization is done since populations outside the computational subspace is lost.
+        # _3to2levels returns an array of populations in differnt states.
         state_in_comp_space = _3to2levels(final_dm.final_state)
         ps = (CM*state_in_comp_space)
         

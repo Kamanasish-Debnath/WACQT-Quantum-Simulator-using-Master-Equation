@@ -101,7 +101,10 @@ def create_system_Hamiltonian(num_qubits, num_levels, Paulis_gt, CZ_gt, CCZS_gt,
 
     Hamiltonian = Qobj(np.zeros(anihi_oper[0].shape), dims= anihi_oper[0].dims)
     
-    
+    if Nlevels==2:
+        print("Controlled Z and CCZS gates use third excited levels and at least 3 energy levels per \
+             qubit is necessary for using entangling gate")
+
     
     # Adding the nonlinearity terms to the Hamiltonian
     for i in range(Nqubits):

@@ -464,7 +464,7 @@ def pulse_hamiltonians(gate, TC, angle, npoints, measurement = False):
         elif gate[i] == 'PZ':
             Gate_times.append(Pauli_times(0))
             
-        elif gate[i] == 'I' or gate[i]=='U':
+        elif gate[i] == 'I':
             Gate_times.append(Pauli_times(0))
             
         elif gate[i] == 'CCZS':
@@ -562,7 +562,7 @@ def pulse_hamiltonians(gate, TC, angle, npoints, measurement = False):
          
         
         # Incase the inputs are unity (only for measurement part)
-        elif gate[i] == 'U' and measurement == True:
+        elif gate[i] == 'I' and measurement == True:
             unitary_operator = []
             for k in range(Nqubits):
                 unitary_operator.append(qeye(Nlevels))
@@ -581,7 +581,7 @@ def pulse_hamiltonians(gate, TC, angle, npoints, measurement = False):
 
 
 
-def Execute(Hamiltonian, c_ops, Info, Ini, measurement = False, conf_matrix= []):
+def Execute(Hamiltonian, c_ops, Info, Ini):
     '''
     This function executes the quantum circuit and returns the final state.
     
@@ -590,13 +590,12 @@ def Execute(Hamiltonian, c_ops, Info, Ini, measurement = False, conf_matrix= [])
     C_ops         : List of collapse operators
     Info          : The class gate which includes the types of gate, target, control, angle etc
     Ini           : The initial state
-    measurement   : If the gates correspond to measurements
-    conf_matrix   : Confusion matrix incorporating the measurement errors
     
     Returns-
     FState        : The final state
     
     '''
+    
     Tsteps = []
     for i in range(len(Info)):
         
@@ -628,17 +627,7 @@ def Execute(Hamiltonian, c_ops, Info, Ini, measurement = False, conf_matrix= [])
             
         
         Ini = dm            
-    Fstate = Ini
-    
-    if measurement:
-        Pops = Fstate.diag()
-        # Corrections due to measurement errors
-        Pops_measurement_error = conf_matrix*Pops
-        return Pops_measurement_error, Fstate
-        
-   
-    else:
-        return Fstate 
+    return Ini 
 
     
     
@@ -718,13 +707,40 @@ def _3to2levels(dm):
     
     
 def final_pop(probs, gate):
+    '''
+    Depending on the measurements, this function returns the cost function.
+    
+    
+    Example-
+    For 2 qubits, the populations in the computational basis is given by
+    P00, P01, P10, P11
+    
+    The following terms are returned depending on the measurement operators
+    
+    I,I     :     P00 + P01 + P10 + P11
+    I,PZ    :     P00 - P01 + P10 - P11
+    PZ,I    :     P00 + P01 - P10 - P11
+    PZ,PZ   :     P00 - P01 - P10 + P11
+    
+    and so on....
+    
+    
+    Arguments-
+    probs       :      Probabilities in each of the possible states in the computational basis
+    gate        :      Measurement gates
+    
+    
+    Returns-
+    sum         :      Returns (P00__ ± P01__ ± P10__ ± P11__) (sign depends on the measurment operator)
+        
+    '''
     
     ops = []
     for i in gate:
         if i=='PX' or i=='PY' or i=='PZ':
             ops.append(sigmaz())
             
-        elif i == 'U':
+        elif i == 'I':
             ops.append(qeye(2))
             
             

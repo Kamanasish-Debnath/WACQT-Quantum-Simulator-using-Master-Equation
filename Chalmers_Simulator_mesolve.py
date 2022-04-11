@@ -350,8 +350,8 @@ def Pauli_times(angle):
         angle = np.mod(angle, 2*pi)
         
     # Convert the angle to positive if angle is less than 0.
-#     if angle<0:
-#         angle = math.radians(math.degrees(angle) + 360)
+    if angle<0:
+        angle = math.radians(math.degrees(angle) + 360)
 
     for i in range(len(t1)):
         Ang1 = (B*t1[i]) - 0.5*sin(2*B*t1[i])
@@ -448,12 +448,9 @@ def pulse_hamiltonians(gate, TC, angle, npoints, measurement = False):
     
     
     # Calculate an array of gate times and maximum gate time
-    sign_angle = 1
+
     Gate_times = []
     for i in range(len(gate)):
-        if angle[i]<0:
-            angle[i] = np.abs(angle[i])
-            sign_angle = -1
             
         if gate[i] == 'PX' or gate[i]== 'PY':
             Gate_times.append(Pauli_times(angle[i]))
@@ -463,7 +460,6 @@ def pulse_hamiltonians(gate, TC, angle, npoints, measurement = False):
             
         elif gate[i] == 'HD':
             Gate_times.append(Pauli_times(pi/2))
-            sign_angle = -1
             
         elif gate[i] == 'PZ':
             Gate_times.append(Pauli_times(0))
@@ -500,7 +496,7 @@ def pulse_hamiltonians(gate, TC, angle, npoints, measurement = False):
             DRAG_Y = DragPauliX_der * np.heaviside(TE, 0)
             PX_Hamiltonian =  PauliX(TC[i])
             PY_Hamiltonian =  PauliY(TC[i])
-            FHam.append(QobjEvo([[PX_Hamiltonian, sign_angle*DRAG_X],[PY_Hamiltonian, sign_angle*DRAG_Y]], tlist = tlist))
+            FHam.append(QobjEvo([[PX_Hamiltonian, DRAG_X],[PY_Hamiltonian, DRAG_Y]], tlist = tlist))
                 
             
         # Pauli Y gate    
@@ -510,7 +506,7 @@ def pulse_hamiltonians(gate, TC, angle, npoints, measurement = False):
             DRAG_X = DragPauliY_der * np.heaviside(TE, 0)
             PX_Hamiltonian =  PauliX(TC[i])
             PY_Hamiltonian =  PauliY(TC[i])
-            FHam.append(QobjEvo([[PY_Hamiltonian, sign_angle*DRAG_Y],[PX_Hamiltonian, sign_angle*DRAG_X]], tlist = tlist))
+            FHam.append(QobjEvo([[PY_Hamiltonian, DRAG_Y],[PX_Hamiltonian, DRAG_X]], tlist = tlist))
             
            
          
@@ -561,7 +557,7 @@ def pulse_hamiltonians(gate, TC, angle, npoints, measurement = False):
             DRAG_X = DragPauliY_der * np.heaviside(TE, 0)
             PX_Hamiltonian =  PauliX(TC[i])
             PY_Hamiltonian =  PauliY(TC[i])
-            FHam.append(QobjEvo([[PY_Hamiltonian, sign_angle*DRAG_Y],[PX_Hamiltonian, sign_angle*DRAG_X]], tlist = tlist))
+            FHam.append(QobjEvo([[PY_Hamiltonian, DRAG_Y],[PX_Hamiltonian, DRAG_X]], tlist = tlist))
 
          
         

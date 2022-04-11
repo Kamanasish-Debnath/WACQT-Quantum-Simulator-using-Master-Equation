@@ -633,7 +633,7 @@ def Execute(Hamiltonian, c_ops, Info, Ini):
     
     
     
-def Measurement(Hamiltonian, Ini, Info, CM, coeff):
+def Measurement(Hamiltonian, c_ops, Ini, Info, CM, coeff):
     '''
     This function returns the diagonal elements (population) of the density 
     matrix for a given set of measurement gates and confusion matrix.
@@ -664,7 +664,7 @@ def Measurement(Hamiltonian, Ini, Info, CM, coeff):
         H1, tlist = pulse_hamiltonians(gate, TC, angle, npoints, measurement = True)
         
         H2 = sum(H1) + Hamiltonian
-        final_dm = mesolve(H2, Ini, tlist, c_ops = [], e_ops = [], options = Options(store_final_state=True))
+        final_dm = mesolve(H2, Ini, tlist, c_ops, e_ops = [], options = Options(store_final_state=True))
         
         # This truncates the Hilbert space and returns the final state in the computational subspace. 
         # No normalization is done since populations outside the computational subspace is lost.
@@ -674,7 +674,8 @@ def Measurement(Hamiltonian, Ini, Info, CM, coeff):
         
         probabilities.append(coeff[i]*final_pop(ps, gate))
         
-    return probabilities
+    return np.sum(np.real(probabilities))  # Since probabilities, so only real part. 
+                                           # And summed over all other measurements
         
         
     

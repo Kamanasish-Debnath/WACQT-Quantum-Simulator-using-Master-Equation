@@ -1,12 +1,13 @@
-Dr. Kamanasish Debnath
-Postdoctoral Researcher
-Wallenberg Center for Quantum Technology
-Chalmers University of Technology
-Gothenburg, Sweden.
+Dr. Kamanasish Debnath <br>
+Postdoctoral Researcher <br>
+Wallenberg Center for Quantum Technology <br>
+Chalmers University of Technology <br>
+Gothenburg, Sweden. <br>
 
-kamanasish.debnath@chalmers.se
+kamanasish.debnath@chalmers.se <br>
 
-This code can be used to simulate a quantum algorithm using the native gates available at Chalmers.
+This code can be used to simulate a quantum algorithm using the native gates available at Chalmers. <br>
+Please refer to the example folder for more details. <br>
 
 "Chalmers_Simulator_mesolve.py" is imported as "import Chalmers_Simulator as CS" and the developed functionalities can be used.
 

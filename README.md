@@ -11,9 +11,9 @@ This code can be used to simulate a quantum algorithm using the native gates ava
 "Chalmers_Simulator_mesolve.py" is imported as "import Chalmers_Simulator as CS" and the developed functionalities can be used.
 
 Quantum gates modelled so far-
-a) Single qubit gates- Hadamard, Pauli X, Pauli Y and virtual Pauli Z
-b) Entangling gate - Controlled Z gate
+a) Single qubit gates- Hadamard, Pauli X, Pauli Y and virtual Pauli Z <br>
+b) Two qubit entangling gate - Controlled Z gate <br>
+(c) Three qubit entangling gate - Controlled CZS gate
 
-Under construction-
+Under construction- <br>
 a) iSWAP entangling gate
-b) Three qubit Controlled CZS gate.

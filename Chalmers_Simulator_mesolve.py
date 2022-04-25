@@ -817,6 +817,9 @@ def Time_dynamics(Hamiltonian, c_ops, Info, Ini, e_ops = []):
         
     # Tsteps and states has the appended time steps and states. 
     # These has to be merged into a list.  
+        
+        
+    # THIS FUNCTION IS UNDER CONSTRUCTION !!!
     
 
                        

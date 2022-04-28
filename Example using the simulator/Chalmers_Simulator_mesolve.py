@@ -544,7 +544,7 @@ def pulse_hamiltonians(gate, TC, angle, npoints, measurement = False):
                        
             '''
             phi = TC[i][3]
-            Phi_CCZS = -np.exp(1j*phi)
+            phi_CCZS = -np.exp(1j*phi)
             FHam.append(QobjEvo([[oper1, Expo], [oper1.dag(), ExpoC], \
                                  [phi_CCZS*oper2, Expo], [np.conjugate(phi_CCZS)*oper2.dag(), ExpoC]], tlist = tlist))
 

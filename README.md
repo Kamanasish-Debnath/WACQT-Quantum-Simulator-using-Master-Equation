@@ -6,8 +6,12 @@ Gothenburg, Sweden. <br>
 
 kamanasish.debnath@chalmers.se <br>
 
-This code can be used to simulate a quantum algorithm using the native gates available at Chalmers <br>
+This code can be used to simulate any quantum algorithms using the native gates available at Chalmers <br>
 in the presence of noises, decoherences and ZZ interaction between the qubits. <br>
+The code takes the quantum circuit as the input and returns out the final state. <br>
+Measurement errors are also incorporated in the code and can be used by specifying the <br>
+confusion matrix and measurement basis. <br>
+  
 
 
 

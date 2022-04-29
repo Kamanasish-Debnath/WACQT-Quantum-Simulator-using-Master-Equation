@@ -25,4 +25,4 @@ b) Two qubit entangling gate - Controlled Z gate <br>
 
 Under construction- <br>
 a) iSWAP entangling gate <br>
-b) Taking an open QASM file as an input rather than entering the quantum circuit manually.
+b) Taking an open QASM file as the input rather than entering the quantum circuit manually.

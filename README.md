@@ -8,7 +8,7 @@ kamanasish.debnath@chalmers.se <br>
 
 This code can be used to simulate any quantum algorithms using the native gates available at Chalmers <br>
 in the presence of noises, decoherences and ZZ interaction between the qubits. <br>
-The code takes the quantum circuit as the input and returns out the final state. <br>
+The code takes any quantum circuit as its input and returns out the final state. <br>
 Measurement errors are also incorporated in the code and can be used by specifying the <br>
 confusion matrix and measurement basis. <br>
   
@@ -24,4 +24,5 @@ b) Two qubit entangling gate - Controlled Z gate <br>
 (c) Three qubit entangling gate - Controlled CZS gate
 
 Under construction- <br>
-a) iSWAP entangling gate
+a) iSWAP entangling gate <br>
+b) Taking an open QASM file as an input rather than entering the quantum circuit manually.

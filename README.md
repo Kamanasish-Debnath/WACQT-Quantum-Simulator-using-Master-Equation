@@ -6,7 +6,9 @@ Gothenburg, Sweden. <br>
 
 kamanasish.debnath@chalmers.se <br>
 
-This code can be used to simulate a quantum algorithm using the native gates available at Chalmers. <br>
+This code can be used to simulate a quantum algorithm using the native gates available at Chalmers <br>
+in the presence of noises, decoherences and ZZ interaction between the qubits. <br>
+
 
 
 "Chalmers_Simulator_mesolve.py" is imported as "import Chalmers_Simulator as CS" and the developed functionalities can be used. <br>

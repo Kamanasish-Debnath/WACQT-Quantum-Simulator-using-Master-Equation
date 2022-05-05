@@ -144,39 +144,39 @@ def create_system_Hamiltonian(num_qubits, num_levels, Paulis_gt, CZ_gt, CCZS_gt,
     return Hamiltonian, c_ops
 
   
-# def Pauli_times(angle):
-#     '''
-#     For a given angle of a single qubit gates such as Pauli X and Pauli Y, 
-#     this function returns the gate time.
-#     The gate time is determined by area of the pulse.
-#     Pulse used is 2B sin^2 (Bt), where B is the Rabi frequency, which is determined
-#     by- B = (pi/Gate time).
+def Pauli_times(angle):
+    '''
+    For a given angle of a single qubit gates such as Pauli X and Pauli Y, 
+    this function returns the gate time.
+    The gate time is determined by area of the pulse.
+    Pulse used is 2B sin^2 (Bt), where B is the Rabi frequency, which is determined
+    by- B = (pi/Gate time).
     
         
-#     Arguments-
-#     angle         :       Angle of the given Pauli gate
+    Arguments-
+    angle         :       Angle of the given Pauli gate
     
-#     Returns-
-#     gate time     :       Gate time for a given angle  
+    Returns-
+    gate time     :       Gate time for a given angle  
     
-#     '''
-#     t1 = np.linspace(0, 2*gate_time_Paulis, 10000)
+    '''
+    t1 = np.linspace(0, 2*gate_time_Paulis, 10000)
     
             
-#     # Convert the angle between 0 and 2pi.
-#     if angle>(2*pi):
-#         angle = np.mod(angle, 2*pi)
+    # Convert the angle between 0 and 2pi.
+    if angle>(2*pi):
+        angle = np.mod(angle, 2*pi)
         
-#     # Convert the angle to positive if angle is less than 0.
-#     if angle<0:
-#         angle = math.radians(math.degrees(angle) + 360)
+    # Convert the angle to positive if angle is less than 0.
+    if angle<0:
+        angle = math.radians(math.degrees(angle) + 360)
 
-#     for i in range(len(t1)):
-#         Ang1 = (B*t1[i]) - 0.5*sin(2*B*t1[i])
-#         Ang2 = (B*t1[i-1]) - 0.5*sin(2*B*t1[i-1])
+    for i in range(len(t1)):
+        Ang1 = (B*t1[i]) - 0.5*sin(2*B*t1[i])
+        Ang2 = (B*t1[i-1]) - 0.5*sin(2*B*t1[i-1])
 
-#         if Ang1>=angle and Ang2<=angle:
-#             return (t1[i]+t1[i-1])/2
+        if Ang1>=angle and Ang2<=angle:
+            return (t1[i]+t1[i-1])/2
 
 
 def Omega(ang):
@@ -304,7 +304,7 @@ def PI12(target):
     Two = basis(Nlevels, 2)
     for i in range(Nqubits):
         if i==target:
-            oper.append(One*Two.dag())
+            oper.append(-1j*One*Two.dag())
         else:
             oper.append(qeye(Nlevels))
     opera = tensor(oper)
@@ -549,11 +549,10 @@ def pulse_hamiltonians(gate, TC, angle, npoints, measurement = False):
             DragPauliX = DRAGX(tlist, angle[i])  
             DragPauliX_der = DRAGX_derivative(tlist, angle[i])
             DragPauliY = DRAGX(tlist, angle[i]) 
-            DragPauliY_der = DRAGY_derivative(tlist, angle[i])            
-            
+            DragPauliY_der = DRAGY_derivative(tlist, angle[i])                        
             TE = gate_time-tlist
             DRAG_Y = DragPauliY * np.heaviside(TE, 0)
-            DRAG_X = DragPauliY_der * np.heaviside(TE, 0)
+            DRAG_X = DragPauliY_der * np.heaviside(TE, 0)            
             PX_Hamiltonian =  -PauliX(TC[i])
             PY_Hamiltonian =   PauliY(TC[i])
             FHam.append(QobjEvo([[PY_Hamiltonian, DRAG_Y],[PX_Hamiltonian, DRAG_X]], tlist = tlist))
@@ -851,7 +850,7 @@ def Time_dynamics(Hamiltonian, c_ops, Info, Ini, e_ops = []):
     states = []
     for i in range(len(Info)):
         
-        npoints = 1000
+        npoints = 2000
         gate =  np.array(Info[i].name)
         TC   =  np.array(Info[i].Tar_Con)
         angle = np.array(Info[i].angle)

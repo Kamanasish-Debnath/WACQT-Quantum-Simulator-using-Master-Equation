@@ -113,7 +113,7 @@ def create_system_Hamiltonian(num_qubits, num_levels, Paulis_gt, CZ_gt, CCZS_gt,
     
     # Adding the nonlinearity terms to the Hamiltonian
     for i in range(Nqubits):
-        Hamiltonian= Hamiltonian + Alpha*anihi_oper[i].dag()*anihi_oper[i].dag()*anihi_oper[i]*anihi_oper[i] 
+        Hamiltonian= Hamiltonian + 0.5*Alpha*anihi_oper[i].dag()*anihi_oper[i].dag()*anihi_oper[i]*anihi_oper[i] 
         
         
         
@@ -144,43 +144,55 @@ def create_system_Hamiltonian(num_qubits, num_levels, Paulis_gt, CZ_gt, CCZS_gt,
     return Hamiltonian, c_ops
 
   
-def Pauli_times(angle):
-    '''
-    For a given angle of a single qubit gates such as Pauli X and Pauli Y, 
-    this function returns the gate time.
-    The gate time is determined by area of the pulse.
-    Pulse used is 2B sin^2 (Bt), where B is the Rabi frequency, which is determined
-    by- B = (pi/Gate time).
+# def Pauli_times(angle):
+#     '''
+#     For a given angle of a single qubit gates such as Pauli X and Pauli Y, 
+#     this function returns the gate time.
+#     The gate time is determined by area of the pulse.
+#     Pulse used is 2B sin^2 (Bt), where B is the Rabi frequency, which is determined
+#     by- B = (pi/Gate time).
     
         
-    Arguments-
-    angle         :       Angle of the given Pauli gate
+#     Arguments-
+#     angle         :       Angle of the given Pauli gate
     
-    Returns-
-    gate time     :       Gate time for a given angle  
+#     Returns-
+#     gate time     :       Gate time for a given angle  
     
-    '''
-    t1 = np.linspace(0, 2*gate_time_Paulis, 10000)
+#     '''
+#     t1 = np.linspace(0, 2*gate_time_Paulis, 10000)
     
             
-    # Convert the angle between 0 and 2pi.
-    if angle>(2*pi):
-        angle = np.mod(angle, 2*pi)
+#     # Convert the angle between 0 and 2pi.
+#     if angle>(2*pi):
+#         angle = np.mod(angle, 2*pi)
         
-    # Convert the angle to positive if angle is less than 0.
-    if angle<0:
-        angle = math.radians(math.degrees(angle) + 360)
+#     # Convert the angle to positive if angle is less than 0.
+#     if angle<0:
+#         angle = math.radians(math.degrees(angle) + 360)
 
-    for i in range(len(t1)):
-        Ang1 = (B*t1[i]) - 0.5*sin(2*B*t1[i])
-        Ang2 = (B*t1[i-1]) - 0.5*sin(2*B*t1[i-1])
+#     for i in range(len(t1)):
+#         Ang1 = (B*t1[i]) - 0.5*sin(2*B*t1[i])
+#         Ang2 = (B*t1[i-1]) - 0.5*sin(2*B*t1[i-1])
 
-        if Ang1>=angle and Ang2<=angle:
-            return (t1[i]+t1[i-1])/2
+#         if Ang1>=angle and Ang2<=angle:
+#             return (t1[i]+t1[i-1])/2
 
+
+def Omega(ang):
+    '''
+    This function returns the pulse strength for a particular angle for single qubit gates 
+    '''
+    A = pi/gate_time_Paulis
+    integr = (gate_time_Paulis/2) - (np.sin(2*A*gate_time_Paulis)/(4*A))
+    Ome = ang/integr
+    return Ome
+    
+    
+    
         
         
-def DRAGX(t):
+def DRAGX(t, ang):
     '''
     This function returns the pulse stength 
     at a given time when applying a sigmax() type pulse.
@@ -188,10 +200,12 @@ def DRAGX(t):
     B is the maximum Rabi frequency
     '''
     
-    return (2*B*sin(B*t)*sin(B*t))
+#     return (2*B*sin(B*t)*sin(B*t))
+    A = (pi/gate_time_Paulis)
+    return Omega(ang)*(np.sin(A*t)**2)
 
 
-def DRAGX_derivative(t):
+def DRAGX_derivative(t, ang):
     '''
     This function returns the derivative of the pulse stength 
     at a given time when applying a sigmax() type pulse.
@@ -199,20 +213,30 @@ def DRAGX_derivative(t):
     B is the maximum Rabi frequency and Alpha is the nonlinearity of the qubit.
     '''
 #     return ((2*B*B*sin(B*t)*cos(B*t))/(-2*Alpha))
-    return 2*B*B*sin(2*B*t)/(-2*Alpha)
+#     return 2*B*B*sin(2*B*t)/(-2*Alpha)
+    A = (pi/gate_time_Paulis)
+    return  Omega(ang)*((2*A*np.cos(A*t)*np.sin(A*t))/(-2*Alpha))
+
+    
+
+    
     
         
-def DRAGY(t):
+def DRAGY(t, ang):
     '''
     This function returns the pulse stength 
     at a given time when applying a sigmay() type pulse.
     Here, we are using sin^2 pulse.
     B is the maximum Rabi frequency
     '''
-    return (2*B*sin(B*t)*sin(B*t))
+#     return (2*B*sin(B*t)*sin(B*t))
+    A = (pi/gate_time_Paulis)
+    return  Omega(ang)*(np.sin(A*t)**2)
 
 
-def DRAGY_derivative(t):
+
+
+def DRAGY_derivative(t, ang):
     '''
     This function returns the derivative of the pulse stength 
     at a given time when applying a sigmay() type pulse.
@@ -220,8 +244,9 @@ def DRAGY_derivative(t):
     B is the maximum Rabi frequency and Alpha is the nonlinearity of the qubit.
     '''
 #     return ((2*B*B*sin(B*t)*cos(B*t))/(-2*Alpha))
-    return 2*B*B*sin(2*B*t)/(-2*Alpha)
-
+#     return 2*B*B*sin(2*B*t)/(-2*Alpha)
+    A = (pi/gate_time_Paulis)
+    return  Omega(ang)*((2*A*np.cos(A*t)*np.sin(A*t))/(-2*Alpha))
 
 
 
@@ -470,13 +495,13 @@ def pulse_hamiltonians(gate, TC, angle, npoints, measurement = False):
     for i in range(len(gate)):
             
         if gate[i] == 'PX' or gate[i]== 'PY':
-            Gate_times.append(Pauli_times(angle[i]))
+            Gate_times.append(gate_time_Paulis)
         
         elif gate[i] == 'CZ':
             Gate_times.append(gate_time_CZ)
             
         elif gate[i] == 'HD':
-            Gate_times.append(Pauli_times(pi/2))
+            Gate_times.append(gate_time_Paulis)
             
         elif gate[i] == 'PZ':
             Gate_times.append(Pauli_times(0))
@@ -495,12 +520,8 @@ def pulse_hamiltonians(gate, TC, angle, npoints, measurement = False):
             
     max_gate_time = np.max(Gate_times)
     tlist = np.linspace(0, max_gate_time, npoints)
-    DragPauliX = DRAGX(tlist)  
-    DragPauliX_der = DRAGX_derivative(tlist)
-    DragPauliY = DRAGX(tlist) 
-    DragPauliY_der = DRAGY_derivative(tlist)
     
-    CZ_expo = exp(1j*2*Alpha*tlist)
+    CZ_expo = exp(1j*Alpha*tlist)
         
         
      # Calculate and store the time dependent parts as quantum object
@@ -511,6 +532,11 @@ def pulse_hamiltonians(gate, TC, angle, npoints, measurement = False):
         
         # Pauli X gate
         if gate[i] == 'PX':
+            DragPauliX = DRAGX(tlist, angle[i])  
+            DragPauliX_der = DRAGX_derivative(tlist, angle[i])
+            DragPauliY = DRAGX(tlist, angle[i]) 
+            DragPauliY_der = DRAGY_derivative(tlist, angle[i])
+            
             TE = gate_time-tlist
             DRAG_X = DragPauliX * np.heaviside(TE, 0)
             DRAG_Y = DragPauliX_der * np.heaviside(TE, 0)
@@ -520,6 +546,11 @@ def pulse_hamiltonians(gate, TC, angle, npoints, measurement = False):
             
         # Pauli Y gate    
         elif gate[i] == 'PY':
+            DragPauliX = DRAGX(tlist, angle[i])  
+            DragPauliX_der = DRAGX_derivative(tlist, angle[i])
+            DragPauliY = DRAGX(tlist, angle[i]) 
+            DragPauliY_der = DRAGY_derivative(tlist, angle[i])            
+            
             TE = gate_time-tlist
             DRAG_Y = DragPauliY * np.heaviside(TE, 0)
             DRAG_X = DragPauliY_der * np.heaviside(TE, 0)
@@ -572,6 +603,12 @@ def pulse_hamiltonians(gate, TC, angle, npoints, measurement = False):
         # Hadamard Gate
         elif gate[i] == 'HD':           
             TE = gate_time-tlist
+            DragPauliX = DRAGX(tlist, angle[i])  
+            DragPauliX_der = DRAGX_derivative(tlist, angle[i])
+            DragPauliY = DRAGX(tlist, angle[i]) 
+            DragPauliY_der = DRAGY_derivative(tlist, angle[i])   
+            
+            
             DRAG_Y = DragPauliY * np.heaviside(TE, 0)
             DRAG_X = DragPauliY_der * np.heaviside(TE, 0)
             PX_Hamiltonian =  PauliX(TC[i])
@@ -637,10 +674,9 @@ def Execute(Hamiltonian, c_ops, Info, Ini):
         
         H1, tlist = pulse_hamiltonians(gate, TC, angle, npoints)
         H2 = sum(H1) + Hamiltonian
-        
 
         final_dm = mesolve(H2, Ini, tlist, c_ops, e_ops = [], options = Options(store_final_state=True, \
-                                                                                atol= 1e-8, rtol=1e-8, store_states = True))
+                                                                                atol= 1e-8, rtol=1e-8))
         dm = final_dm.final_state
         if 'HD' in gate:
             index_HD = np.where(gate == 'HD')[0]
@@ -657,7 +693,7 @@ def Execute(Hamiltonian, c_ops, Info, Ini):
             
         
         Ini = dm            
-    return Ini, final_dm.states 
+    return Ini
 
     
     

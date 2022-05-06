@@ -95,14 +95,31 @@ def create_system_Hamiltonian(num_qubits, num_levels, Paulis_gt, CZ_gt, CCZS_gt,
 
 
     anihi_oper= []
+    
+    # anihi10_oper contains the dissipation operator |1>->|0>
+    # anihi21_oper contains the dissipation operator |2>->|1>
+    
+    anihi10_oper = []
+    anihi21_oper = []
+    
+    
     for i in range(Nqubits):
         Operators= []
+        Destroy10 = []
+        Destroy21 = []
         for j in range(Nqubits):
             if i==j:
                 Operators.append(destroy(Nlevels))
+                Destroy10.append(basis(Nlevels,0)*basis(Nlevels,1).dag())
+                Destroy21.append(basis(Nlevels,1)*basis(Nlevels,2).dag())
             else:
                 Operators.append(qeye(Nlevels))
+                Destroy10.append(qeye(Nlevels))
+                Destroy21.append(qeye(Nlevels))
+                
         anihi_oper.append(tensor(Operators))
+        anihi10_oper.append(tensor(Destroy10))
+        anihi21_oper.append(tensor(Destroy21))
 
     Hamiltonian = Qobj(np.zeros(anihi_oper[0].shape), dims= anihi_oper[0].dims)
     
@@ -133,7 +150,8 @@ def create_system_Hamiltonian(num_qubits, num_levels, Paulis_gt, CZ_gt, CCZS_gt,
    
     if len(Diss) != 0:
         for i in range(Nqubits):
-            c_ops.append(sqrt(1/(Diss[i]))*anihi_oper[i])
+            c_ops.append(sqrt(1/(Diss[i]))*anihi10_oper[i])
+            c_ops.append(sqrt(1/(2*Diss[i]))*anihi21_oper[i])
     if len(Deph) != 0:
         for i in range(Nqubits):
             c_ops.append(sqrt(1/(Deph[i]))*anihi_oper[i].dag()*anihi_oper[i])

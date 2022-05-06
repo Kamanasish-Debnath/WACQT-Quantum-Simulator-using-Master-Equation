@@ -181,10 +181,7 @@ def Pauli_times(angle):
 
 def Omega(ang):
     '''
-    This function returns the pulse strength for a particular angle for single qubit gates.
-    The DRAG pulses returns a sin^2 pulse whose amplitude lies between 0 and 1.
-    This function returns the prefactor based on the gate time and angle which is then 
-    multiplied as a prefactor before the sin^2 pulse.
+    This function returns the pulse strength for a particular angle for single qubit gates 
     '''
     A = pi/gate_time_Paulis
     integr = (gate_time_Paulis/2) - (np.sin(2*A*gate_time_Paulis)/(4*A))
@@ -200,7 +197,7 @@ def DRAGX(t, ang):
     This function returns the pulse stength 
     at a given time when applying a sigmax() type pulse.
     Here, we are using sin^2 pulse.
-    A is the maximum Rabi frequency
+    B is the maximum Rabi frequency
     '''
     
 #     return (2*B*sin(B*t)*sin(B*t))
@@ -213,7 +210,7 @@ def DRAGX_derivative(t, ang):
     This function returns the derivative of the pulse stength 
     at a given time when applying a sigmax() type pulse.
     Here, we are using sin^2 pulse.
-    A is the maximum Rabi frequency and Alpha is the nonlinearity of the qubit.
+    B is the maximum Rabi frequency and Alpha is the nonlinearity of the qubit.
     '''
 #     return ((2*B*B*sin(B*t)*cos(B*t))/(-2*Alpha))
 #     return 2*B*B*sin(2*B*t)/(-2*Alpha)
@@ -230,7 +227,7 @@ def DRAGY(t, ang):
     This function returns the pulse stength 
     at a given time when applying a sigmay() type pulse.
     Here, we are using sin^2 pulse.
-    A is the maximum Rabi frequency
+    B is the maximum Rabi frequency
     '''
 #     return (2*B*sin(B*t)*sin(B*t))
     A = (pi/gate_time_Paulis)
@@ -244,7 +241,7 @@ def DRAGY_derivative(t, ang):
     This function returns the derivative of the pulse stength 
     at a given time when applying a sigmay() type pulse.
     Here, we are using sin^2 pulse.
-    A is the maximum Rabi frequency and Alpha is the nonlinearity of the qubit.
+    B is the maximum Rabi frequency and Alpha is the nonlinearity of the qubit.
     '''
 #     return ((2*B*B*sin(B*t)*cos(B*t))/(-2*Alpha))
 #     return 2*B*B*sin(2*B*t)/(-2*Alpha)
@@ -446,12 +443,17 @@ def virtual_Z_gate(dm, angle, target):
         else:
             Z7.append(qeye(Nlevels))
     
-    Z3 = to_super(tensor(Z7))
-        
-    final_state = operator_to_vector(dm)
-    final_state = Z3*final_state
-    final_state = vector_to_operator(final_state)
-    return final_state    
+    if dm.type == 'oper':
+        Z3 = to_super(tensor(Z7))
+
+        final_state = operator_to_vector(dm)
+        final_state = Z3*final_state
+        final_state = vector_to_operator(final_state)
+        return final_state
+    
+    else:
+        Z3 = tensor(Z7)*dm
+        return (Z3)
 
 
 
@@ -621,12 +623,12 @@ def pulse_hamiltonians(gate, TC, angle, npoints, measurement = False):
         elif gate[i]=='PI12':
             Pulse_strength = (pi/gate_time_Paulis) 
             TE = gate_time-tlist
-            
             Expo = 0.5*Pulse_strength * CZ_expo*np.heaviside(TE, 0)
             ExpoC = 0.5*Pulse_strength * np.conjugate(CZ_expo)*np.heaviside(TE, 0)
             
             oper =  PI12(TC[i])
             FHam.append(QobjEvo([[oper, Expo], [oper.dag(), ExpoC]], tlist = tlist))
+            
         
         
         
@@ -678,7 +680,7 @@ def Execute(Hamiltonian, c_ops, Info, Ini):
         H2 = sum(H1) + Hamiltonian
 
         final_dm = mesolve(H2, Ini, tlist, c_ops, e_ops = [], options = Options(store_final_state=True, \
-                                                                                atol= 1e-8, rtol=1e-8))
+                                                                                atol= 1e-10, rtol=1e-10))
         dm = final_dm.final_state
         if 'HD' in gate:
             index_HD = np.where(gate == 'HD')[0]

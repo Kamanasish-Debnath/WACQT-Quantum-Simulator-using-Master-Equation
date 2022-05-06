@@ -181,7 +181,10 @@ def Pauli_times(angle):
 
 def Omega(ang):
     '''
-    This function returns the pulse strength for a particular angle for single qubit gates 
+    This function returns the pulse strength for a particular angle for single qubit gates.
+    The DRAG pulses returns a sin^2 pulse whose amplitude lies between 0 and 1.
+    This function returns the prefactor based on the gate time and angle which is then 
+    multiplied as a prefactor before the sin^2 pulse.
     '''
     A = pi/gate_time_Paulis
     integr = (gate_time_Paulis/2) - (np.sin(2*A*gate_time_Paulis)/(4*A))
@@ -197,7 +200,7 @@ def DRAGX(t, ang):
     This function returns the pulse stength 
     at a given time when applying a sigmax() type pulse.
     Here, we are using sin^2 pulse.
-    B is the maximum Rabi frequency
+    A is the maximum Rabi frequency
     '''
     
 #     return (2*B*sin(B*t)*sin(B*t))
@@ -210,7 +213,7 @@ def DRAGX_derivative(t, ang):
     This function returns the derivative of the pulse stength 
     at a given time when applying a sigmax() type pulse.
     Here, we are using sin^2 pulse.
-    B is the maximum Rabi frequency and Alpha is the nonlinearity of the qubit.
+    A is the maximum Rabi frequency and Alpha is the nonlinearity of the qubit.
     '''
 #     return ((2*B*B*sin(B*t)*cos(B*t))/(-2*Alpha))
 #     return 2*B*B*sin(2*B*t)/(-2*Alpha)
@@ -227,7 +230,7 @@ def DRAGY(t, ang):
     This function returns the pulse stength 
     at a given time when applying a sigmay() type pulse.
     Here, we are using sin^2 pulse.
-    B is the maximum Rabi frequency
+    A is the maximum Rabi frequency
     '''
 #     return (2*B*sin(B*t)*sin(B*t))
     A = (pi/gate_time_Paulis)
@@ -241,7 +244,7 @@ def DRAGY_derivative(t, ang):
     This function returns the derivative of the pulse stength 
     at a given time when applying a sigmay() type pulse.
     Here, we are using sin^2 pulse.
-    B is the maximum Rabi frequency and Alpha is the nonlinearity of the qubit.
+    A is the maximum Rabi frequency and Alpha is the nonlinearity of the qubit.
     '''
 #     return ((2*B*B*sin(B*t)*cos(B*t))/(-2*Alpha))
 #     return 2*B*B*sin(2*B*t)/(-2*Alpha)

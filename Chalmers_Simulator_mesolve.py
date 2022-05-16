@@ -131,6 +131,11 @@ def create_system_Hamiltonian(num_qubits, num_levels, Paulis_gt, CZ_gt, CCZS_gt,
              qubit is necessary for using entangling gate")
 
     
+    # Check that Alpha is not a list
+    if type(Alpha) == list:
+        print("Only identical qubits can be modelled. Using the first value of Alpha for all qubits")
+        Alpha = Alpha[0]
+    
     # Adding the nonlinearity terms to the Hamiltonian
     for i in range(Nqubits):
         Hamiltonian= Hamiltonian + 0.5*Alpha*anihi_oper[i].dag()*anihi_oper[i].dag()*anihi_oper[i]*anihi_oper[i] 

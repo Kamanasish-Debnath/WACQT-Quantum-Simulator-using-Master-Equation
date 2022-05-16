@@ -96,8 +96,11 @@ def create_system_Hamiltonian(num_qubits, num_levels, Paulis_gt, CZ_gt, CCZS_gt,
 
     anihi_oper= []
     
-    # anihi10_oper contains the dissipation operator |1>->|0>
-    # anihi21_oper contains the dissipation operator |2>->|1>
+    # We are using the fact here that the dissipation rate from |2> --> |1>
+    # occurs at a rate which is double than that of |1> --> |0>
+    
+    # anihi10_oper contains the dissipation operator |1> --> |0>
+    # anihi21_oper contains the dissipation operator |2> --> |1>
     
     anihi10_oper = []
     anihi21_oper = []

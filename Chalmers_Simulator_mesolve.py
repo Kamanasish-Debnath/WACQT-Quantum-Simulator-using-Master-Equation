@@ -207,7 +207,10 @@ def Pauli_times(angle):
 
 def Omega(ang):
     '''
-    This function returns the pulse strength for a particular angle for single qubit gates 
+    This function returns the pulse strength for a particular angle for single qubit gates.
+    Note that the pulse shape is always sin^(At) which ranges from 0 to 1. This function 
+    returns the prefactor (the amplitude) depending on the required angle for the single 
+    qubit gate.
     '''
     A = pi/gate_time_Paulis
     integr = (gate_time_Paulis/2) - (np.sin(2*A*gate_time_Paulis)/(4*A))
@@ -385,8 +388,7 @@ def CCZS(control, target1, target2):
                           
     oper_lambda2   :      |101><200| + |111><210| equivalent of the main article
                           in the total Hilbert space.
-    
-    
+       
     '''
 
     l0 = basis(Nlevels, 0)

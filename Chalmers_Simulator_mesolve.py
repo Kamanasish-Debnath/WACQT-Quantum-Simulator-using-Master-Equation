@@ -545,9 +545,13 @@ def pulse_hamiltonians(gate, TC, angle, npoints, measurement = False):
         elif gate[i] == 'PI12':
             Gate_times.append(gate_time_Paulis)
             
+        else:
+            print("-"*100)
+            print("ERROR in the Gate inputs !! Check the Gate Type")
+            print("-"*100)
+        
     max_gate_time = np.max(Gate_times)
     tlist = np.linspace(0, max_gate_time, npoints)
-    
     CZ_expo = exp(1j*Alpha*tlist)
         
         
@@ -571,6 +575,7 @@ def pulse_hamiltonians(gate, TC, angle, npoints, measurement = False):
             PY_Hamiltonian =  PauliY(TC[i])
             FHam.append(QobjEvo([[PX_Hamiltonian, DRAG_X],[PY_Hamiltonian, DRAG_Y]], tlist = tlist))
             
+            
         # Pauli Y gate    
         elif gate[i] == 'PY':
             DragPauliX = DRAGX(tlist, angle[i])  
@@ -583,8 +588,7 @@ def pulse_hamiltonians(gate, TC, angle, npoints, measurement = False):
             PX_Hamiltonian =  -PauliX(TC[i])
             PY_Hamiltonian =   PauliY(TC[i])
             FHam.append(QobjEvo([[PY_Hamiltonian, DRAG_Y],[PX_Hamiltonian, DRAG_X]], tlist = tlist))
-            
-           
+                
          
         # Controlled Z gate
         elif gate[i] == 'CZ':
@@ -595,8 +599,7 @@ def pulse_hamiltonians(gate, TC, angle, npoints, measurement = False):
             opera = CZ(TC[i][0],TC[i][1])
             FHam.append(QobjEvo([[opera, Expo], [opera.dag(), ExpoC]], tlist = tlist))
             
-        
-        
+           
         # Controlled CZS three qubit gate
         elif gate[i] == 'CCZS' or gate[i] == 'SCCZS':
             Om_CZS = pi/(sqrt(2)*gate_time_CCZS) # Rabi frequency
@@ -616,7 +619,9 @@ def pulse_hamiltonians(gate, TC, angle, npoints, measurement = False):
             
             
             [exp(i phi)*exp(1j*alpha*tlist)*oper2] + [exp(-i phi)*exp(-1j*alpha*tlist)*oper2.dag()] ----> levels 
-            in which lambda2 acts
+            in which lambda2 acts.
+            
+            Refer to the  PRX QUANTUM 2, 040348 (2021) for more details.
                        
             '''
             phi = TC[i][3]

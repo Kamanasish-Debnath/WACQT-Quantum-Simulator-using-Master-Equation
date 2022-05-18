@@ -97,7 +97,8 @@ def create_system_Hamiltonian(num_qubits, num_levels, Paulis_gt, CZ_gt, CCZS_gt,
     anihi_oper= []
     
     # We are using the fact here that the dissipation rate from |2> --> |1>
-    # occurs at a rate which is double than that of |1> --> |0>
+    # occurs at a rate which is double than that of |1> --> |0>. 
+    # Reference Chris Warren and new manuscript in preparation.
     
     # anihi10_oper contains the dissipation operator |1> --> |0>
     # anihi21_oper contains the dissipation operator |2> --> |1>
@@ -105,6 +106,11 @@ def create_system_Hamiltonian(num_qubits, num_levels, Paulis_gt, CZ_gt, CCZS_gt,
     anihi10_oper = []
     anihi21_oper = []
     
+    # Check that Alpha is not a list
+    if type(Alpha) == list:
+        print("Only identical qubits can be modelled as of now. \
+        Using the first value from the list for all qubits.")
+        Alpha = Alpha[0]
     
     for i in range(Nqubits):
         Operators= []
@@ -130,13 +136,11 @@ def create_system_Hamiltonian(num_qubits, num_levels, Paulis_gt, CZ_gt, CCZS_gt,
         print("Controlled Z and CCZS gates use third excited levels and at least 3 energy levels per \
              qubit is necessary for using entangling gate")
 
-    
-    # Check that Alpha is not a list
-    if type(Alpha) == list:
-        print("Only identical qubits can be modelled. Using the first value of Alpha for all qubits")
-        Alpha = Alpha[0]
+   
     
     # Adding the nonlinearity terms to the Hamiltonian
+    # Note a factor (1/2) before the nonlinearity terms.
+    
     for i in range(Nqubits):
         Hamiltonian= Hamiltonian + 0.5*Alpha*anihi_oper[i].dag()*anihi_oper[i].dag()*anihi_oper[i]*anihi_oper[i] 
         
@@ -152,17 +156,18 @@ def create_system_Hamiltonian(num_qubits, num_levels, Paulis_gt, CZ_gt, CCZS_gt,
         Hamiltonian= Hamiltonian + ZZ_strength[i]*A1.dag()*A1*A2.dag()*A2
 
         
-    # Add the noises
+    # Add the noises using the collapse operators
     c_ops= []
 
-   
     if len(Diss) != 0:
         for i in range(Nqubits):
             c_ops.append(sqrt(1/(Diss[i]))*anihi10_oper[i])
             c_ops.append(sqrt(1/(2*Diss[i]))*anihi21_oper[i])
+            
     if len(Deph) != 0:
         for i in range(Nqubits):
             c_ops.append(sqrt(1/(Deph[i]))*anihi_oper[i].dag()*anihi_oper[i])
+            
     if len(Texc) != 0:
         for i in range(Nqubits):
             c_ops.append(sqrt(1/(Texc[i]))*anihi_oper[i])
@@ -174,6 +179,7 @@ def Pauli_times(angle):
     '''
     For a given angle of a single qubit gates such as Pauli X and Pauli Y, 
     this function returns the gate time.
+    Presently this function is used only for the case when the gate time is zero.
     The gate time is determined by area of the pulse.
     Pulse used is 2B sin^2 (Bt), where B is the Rabi frequency, which is determined
     by- B = (pi/Gate time).
@@ -208,8 +214,8 @@ def Pauli_times(angle):
 def Omega(ang):
     '''
     This function returns the pulse strength for a particular angle for single qubit gates.
-    Note that the pulse shape is always sin^(At) which ranges from 0 to 1. This function 
-    returns the prefactor (the amplitude) depending on the required angle for the single 
+    Note that the pulse shape is always sin^(At) which ranges from 0 to 1. 
+    This function returns the prefactor (the amplitude) depending on the required angle for the single 
     qubit gate.
     '''
     A = pi/gate_time_Paulis
@@ -217,19 +223,13 @@ def Omega(ang):
     Ome = ang/integr
     return Ome
     
-    
-    
-        
+         
         
 def DRAGX(t, ang):
     '''
-    This function returns the pulse stength 
-    at a given time when applying a sigmax() type pulse.
-    Here, we are using sin^2 pulse.
-    B is the maximum Rabi frequency
+    This function returns the pulse stength at a given time when applying a sigmax() type pulse.
+    Here, we are using sin^2 pulse. B is the maximum Rabi frequency
     '''
-    
-#     return (2*B*sin(B*t)*sin(B*t))
     A = (pi/gate_time_Paulis)
     return Omega(ang)*(np.sin(A*t)**2)
 
@@ -241,8 +241,6 @@ def DRAGX_derivative(t, ang):
     Here, we are using sin^2 pulse.
     B is the maximum Rabi frequency and Alpha is the nonlinearity of the qubit.
     '''
-#     return ((2*B*B*sin(B*t)*cos(B*t))/(-2*Alpha))
-#     return 2*B*B*sin(2*B*t)/(-2*Alpha)
     A = (pi/gate_time_Paulis)
     return  Omega(ang)*((2*A*np.cos(A*t)*np.sin(A*t))/(-2*Alpha))
 
@@ -258,7 +256,6 @@ def DRAGY(t, ang):
     Here, we are using sin^2 pulse.
     B is the maximum Rabi frequency
     '''
-#     return (2*B*sin(B*t)*sin(B*t))
     A = (pi/gate_time_Paulis)
     return  Omega(ang)*(np.sin(A*t)**2)
 
@@ -272,8 +269,6 @@ def DRAGY_derivative(t, ang):
     Here, we are using sin^2 pulse.
     B is the maximum Rabi frequency and Alpha is the nonlinearity of the qubit.
     '''
-#     return ((2*B*B*sin(B*t)*cos(B*t))/(-2*Alpha))
-#     return 2*B*B*sin(2*B*t)/(-2*Alpha)
     A = (pi/gate_time_Paulis)
     return  Omega(ang)*((2*A*np.cos(A*t)*np.sin(A*t))/(-2*Alpha))
 
@@ -453,7 +448,6 @@ def virtual_Z_gate(dm, angle, target):
     qc = QubitCircuit(N=1)
     qc.add_gate("RZ", targets=0, arg_value = angle)
     Z = qc.propagators()[0]
-
     Z3 = np.zeros((Nlevels,Nlevels), dtype = complex)
     
     Z3[0,0] = Z[0,0]

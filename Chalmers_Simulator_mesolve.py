@@ -58,7 +58,7 @@ print('Controlled CZS', '\t\t', 'CCZS','\t\t', 'Format:Tar_Con=[[control, target
 print('Sqrt Controlled CZS', '\t', 'SCCZS','\t\t', 'Format:Tar_Con=[[control, target1, target2, phi]]')
 
 
-def create_system_Hamiltonian(num_qubits, num_levels, Paulis_gt, CZ_gt, CCZS_gt, Alp, Diss=[],
+def create_system_Hamiltonian(num_qubits, num_levels, Paulis_gt, PI12_gt, CZ_gt, CCZS_gt, Alp, Diss=[],
                               Deph =[], Texc=[], ZZ_list=[], ZZ_strength=[]):
     
     '''
@@ -68,6 +68,7 @@ def create_system_Hamiltonian(num_qubits, num_levels, Paulis_gt, CZ_gt, CCZS_gt,
     num_qubits      :   Number of qubits
     num_levels      :   Number of levels
     Paulis_gt       :   Single qubit gate time- Pauli X and Pauli Y
+    PI12_gt         :   Gate time for 1->2 transition
     CZ_gt           :   Gate time for two qubit gate, namely Controlled Z gate
     CCZS_gt         :   Gate time for three qubit Controlled CZs gate. Refer PRX QUANTUM 2, 040348 (2021).
     Alp             :   Non linearity in each qubit (Presently only homogeneous qubits are supported)
@@ -84,10 +85,11 @@ def create_system_Hamiltonian(num_qubits, num_levels, Paulis_gt, CZ_gt, CCZS_gt,
     '''
     
     # Defining some global variables which will be used in all the functions
-    global Nqubits, Nlevels, Nqubits, gate_time_Paulis, gate_time_CZ, gate_time_CCZS, Alpha, B, anihi_oper
+    global Nqubits, Nlevels, Nqubits, gate_time_Paulis, gate_time_PI12, gate_time_CZ, gate_time_CCZS, Alpha, B, anihi_oper
 
 
     gate_time_Paulis = Paulis_gt
+    gate_time_PI12 = PI12_gt
     gate_time_CZ = CZ_gt
     gate_time_CCZS = CCZS_gt
     Alpha = Alp
@@ -324,7 +326,80 @@ def PauliY(target):
     return final_operator
 
 
+
+def PauliXExact(target):
+    '''
+    This function returns the operator for a perfect Pauli X gate (not DRAG)
+    in the total Hilbert space
+    
+    Arguments
+    ---------------------
+    target      :    target qubit
+    
+    
+    Returns
+    ---------------------
+    opera        :   final operator coupling 0->1 state
+    
+    '''
+    oper = []
+    Zero = basis(Nlevels, 0)
+    One  = basis(Nlevels, 1)
+    for i in range(Nqubits):
+        if i==target:
+            oper.append((One*Zero.dag() + Zero*One.dag())/2)
+        else:
+            oper.append(qeye(Nlevels))
+    opera = tensor(oper)
+    return opera
+
+
+
+def PauliYExact(target):
+    '''
+    This function returns the operator for a perfect Pauli Y gate (not DRAG)
+    in the total Hilbert space
+    
+    Arguments
+    ---------------------
+    target      :    target qubit
+    
+    
+    Returns
+    ---------------------
+    opera        :   final operator coupling 0->1 state
+    
+    '''
+    oper = []
+    Zero = basis(Nlevels, 0)
+    One  = basis(Nlevels, 1)
+    for i in range(Nqubits):
+        if i==target:
+            oper.append((1j*One*Zero.dag() -1j* Zero*One.dag())/2)
+        else:
+            oper.append(qeye(Nlevels))
+    opera = tensor(oper)
+    return opera
+
+
+
+
 def PI12(target):
+    '''
+    This function returns the operator corresponding to 1->2 transition
+    in the total Hilbert space. For example, for state preparation in 
+    |200> state and creating W state by CCZS gate.
+    
+    Arguments
+    ---------------------
+    target      :    target qubit
+    
+    
+    Returns
+    ---------------------
+    opera        :   final operator coupling 1->2 state
+    
+    '''
     oper = [] 
     One = basis(Nlevels, 1)
     Two = basis(Nlevels, 2)
@@ -523,7 +598,7 @@ def pulse_hamiltonians(gate, TC, angle, npoints, measurement = False):
     Gate_times = []
     for i in range(len(gate)):
             
-        if gate[i] == 'PX' or gate[i]== 'PY':
+        if gate[i] == 'PX' or gate[i]== 'PY' or gate[i]=='PXe' or gate[i]=='PYe':
             Gate_times.append(gate_time_Paulis)
         
         elif gate[i] == 'CZ':
@@ -545,7 +620,7 @@ def pulse_hamiltonians(gate, TC, angle, npoints, measurement = False):
             Gate_times.append(gate_time_CCZS*0.5)
             
         elif gate[i] == 'PI12':
-            Gate_times.append(gate_time_Paulis)
+            Gate_times.append(gate_time_PI12)
             
         else:
             print("-"*100)
@@ -650,7 +725,7 @@ def pulse_hamiltonians(gate, TC, angle, npoints, measurement = False):
 
         
         elif gate[i]=='PI12':
-            Pulse_strength = (pi/gate_time_Paulis) 
+            Pulse_strength = (pi/gate_time_PI12) 
             TE = gate_time-tlist
             Expo = 0.5*Pulse_strength * CZ_expo*np.heaviside(TE, 0)
             ExpoC = 0.5*Pulse_strength * np.conjugate(CZ_expo)*np.heaviside(TE, 0)
@@ -660,6 +735,25 @@ def pulse_hamiltonians(gate, TC, angle, npoints, measurement = False):
             
         
         
+        elif gate[i]=='PXe':
+            Pulse_strength = (pi/gate_time_Paulis) 
+            TE = gate_time-tlist
+            Expo = Pulse_strength * np.heaviside(TE, 0)
+            ExpoC = Pulse_strength * np.heaviside(TE, 0)
+            
+            oper =  PauliXExact(TC[i])
+            FHam.append(QobjEvo([[oper, Expo], [oper.dag(), ExpoC]], tlist = tlist))
+        
+
+        elif gate[i]=='PYe':
+            Pulse_strength = (pi/gate_time_Paulis) 
+            TE = gate_time-tlist
+            Expo = Pulse_strength * np.heaviside(TE, 0)
+            ExpoC = Pulse_strength * np.heaviside(TE, 0)
+            
+            oper =  PauliYExact(TC[i])
+            FHam.append(QobjEvo([[oper, Expo], [oper.dag(), ExpoC]], tlist = tlist))        
+        
         
         # Incase the inputs are unity (only for measurement part)
         elif gate[i] == 'I' and measurement == True:
@@ -668,6 +762,7 @@ def pulse_hamiltonians(gate, TC, angle, npoints, measurement = False):
                 unitary_operator.append(qeye(Nlevels))
             unitary_operator = tensor(unitary_operator)
             FHam.append(QobjEvo([unitary_operator, np.ones(len(tlist))], tlist = tlist))
+            
             
             
         elif gate[i] == 'PZ' and measurement == True:

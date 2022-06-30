@@ -170,7 +170,7 @@ def create_system_Hamiltonian(num_qubits, num_levels, Paulis_gt, CZ_gt, CCZS_gt,
             
     if len(Texc) != 0:
         for i in range(Nqubits):
-            c_ops.append(sqrt(1/(Texc[i]))*anihi_oper[i])
+            c_ops.append(sqrt(1/(Texc[i]))*anihi_oper[i].dag())
         
     return Hamiltonian, c_ops
 

@@ -45,8 +45,10 @@ exp = np.exp
 
 print("The quantum gates which are modelled in this code and their notations-")
 print('-'*80,)
-print('Pauli X', '\t\t', 'PX')
-print('Pauli Y', '\t\t', 'PY')
+print('Pauli X using DRAG', '\t\t', 'PX')
+print('Pauli Y using DRAG', '\t\t', 'PY')
+print('Pauli X exact', '\t\t', 'PXe')
+print('Pauli Y exact', '\t\t', 'PYe')
 print('Pauli Z', '\t\t', 'PZ')
 print('Hadamard', '\t\t', 'HD')
 print('PI12', '\t\t\t', '1->2 transition')

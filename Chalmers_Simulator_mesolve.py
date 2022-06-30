@@ -45,8 +45,8 @@ exp = np.exp
 
 print("The quantum gates which are modelled in this code and their notations-")
 print('-'*80,)
-print('Pauli X using DRAG', '\t\t', 'PX')
-print('Pauli Y using DRAG', '\t\t', 'PY')
+print('Pauli X using DRAG', '\t', 'PX')
+print('Pauli Y using DRAG', '\t', 'PY')
 print('Pauli X exact', '\t\t', 'PXe')
 print('Pauli Y exact', '\t\t', 'PYe')
 print('Pauli Z', '\t\t', 'PZ')
@@ -375,7 +375,7 @@ def PauliYExact(target):
     One  = basis(Nlevels, 1)
     for i in range(Nqubits):
         if i==target:
-            oper.append((1j*One*Zero.dag() -1j* Zero*One.dag())/2)
+            oper.append((1j*One*Zero.dag() - 1j* Zero*One.dag())/2)
         else:
             oper.append(qeye(Nlevels))
     opera = tensor(oper)
@@ -736,23 +736,23 @@ def pulse_hamiltonians(gate, TC, angle, npoints, measurement = False):
         
         
         elif gate[i]=='PXe':
-            Pulse_strength = (pi/gate_time_Paulis) 
+            Pulse_strength = (angle[i]/gate_time_Paulis) 
             TE = gate_time-tlist
             Expo = Pulse_strength * np.heaviside(TE, 0)
             ExpoC = Pulse_strength * np.heaviside(TE, 0)
             
             oper =  PauliXExact(TC[i])
-            FHam.append(QobjEvo([[oper, Expo], [oper.dag(), ExpoC]], tlist = tlist))
+            FHam.append(QobjEvo([[oper, Expo]], tlist = tlist))
         
 
         elif gate[i]=='PYe':
-            Pulse_strength = (pi/gate_time_Paulis) 
+            Pulse_strength = (angle[i]/gate_time_Paulis) 
             TE = gate_time-tlist
             Expo = Pulse_strength * np.heaviside(TE, 0)
             ExpoC = Pulse_strength * np.heaviside(TE, 0)
             
             oper =  PauliYExact(TC[i])
-            FHam.append(QobjEvo([[oper, Expo], [oper.dag(), ExpoC]], tlist = tlist))        
+            FHam.append(QobjEvo([[oper, Expo]], tlist = tlist))        
         
         
         # Incase the inputs are unity (only for measurement part)
@@ -858,7 +858,7 @@ def Measurement(Hamiltonian, c_ops, Ini, Info, CM, coeff):
         H1, tlist = pulse_hamiltonians(gate, TC, angle, npoints, measurement = True)
         
         H2 = sum(H1) + Hamiltonian
-        final_dm = mesolve(H2, Ini, tlist, c_ops, e_ops = [], options = Options(store_final_state=True))
+        final_dm = mesolve(H2, Ini, tlist, c_ops, e_ops = [], options = Options(store_final_state=True, atol = 1e-8, rtol = 1e-8))
         
         # This truncates the Hilbert space and returns the final state in the computational subspace. 
         # No normalization is done since populations outside the computational subspace is lost.

@@ -105,7 +105,6 @@ def create_system_Hamiltonian(num_qubits, num_levels, Paulis_gt, PI12_gt, CZ_gt,
     Nqubits = num_qubits
     B = pi/gate_time_Paulis
 
-
     anihi_oper= []
     
     # We are using the fact here that the dissipation rate from |2> --> |1>
@@ -174,7 +173,11 @@ def create_system_Hamiltonian(num_qubits, num_levels, Paulis_gt, PI12_gt, CZ_gt,
     if len(Diss) != 0:
         for i in range(Nqubits):
             c_ops.append(sqrt(1/(Diss[i]))*anihi10_oper[i])
-            c_ops.append(sqrt(1/(2*Diss[i]))*anihi21_oper[i])
+            
+            # The below line takes into account the fact that the dissipation 
+            # rate from |2> ---> |1> is twice compared to |1> ---> |0>
+            
+            c_ops.append(sqrt(1/(0.5*Diss[i]))*anihi21_oper[i])
             
     if len(Deph) != 0:
         for i in range(Nqubits):
@@ -682,6 +685,9 @@ def pulse_hamiltonians(gate, TC, angle, npoints, measurement = False):
         elif gate[i] == 'PI12':
             Gate_times.append(gate_time_PI12)
             
+        elif gate[i] == 'SSWAP':
+            Gate_times.append(gate_time_SSWAP)
+            
         else:
             print("-"*100)
             print("ERROR in the Gate inputs !! Check the Gate Type")
@@ -765,7 +771,16 @@ def pulse_hamiltonians(gate, TC, angle, npoints, measurement = False):
             phi_CCZS = -np.exp(1j*phi)
             FHam.append(QobjEvo([[oper1, Expo], [oper1.dag(), ExpoC], \
                                  [phi_CCZS*oper2, Expo], [np.conjugate(phi_CCZS)*oper2.dag(), ExpoC]], tlist = tlist))
-
+        
+        
+        # Simultaneous SWAP gate
+        elif gate[i] == 'SSWAP':
+            Pulse_strength = (pi/sqrt(2)*gate_time_SSWAP) 
+            TE = gate_time-tlist
+            Ome = 0.5*Pulse_strength * np.heaviside(TE, 0)
+            
+            oper1, oper2 =  SSWAP(TC[i][0],TC[i][1],TC[i][2])
+            FHam.append(QobjEvo([[oper1, Ome], [oper2, Ome]], tlist = tlist))
                
         
         # Hadamard Gate
@@ -813,6 +828,9 @@ def pulse_hamiltonians(gate, TC, angle, npoints, measurement = False):
             
             oper =  PauliYExact(TC[i])
             FHam.append(QobjEvo([[oper, Expo]], tlist = tlist))        
+        
+        
+        
         
         
         # Incase the inputs are unity (only for measurement part)

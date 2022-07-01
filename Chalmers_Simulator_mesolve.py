@@ -43,7 +43,7 @@ sin = np.sin
 cos = np.cos
 exp = np.exp
 
-print("The quantum gates which are modelled in this code and their notations-")
+print('LIST OF AVAILABLE SINGLE QUBIT GATES-')
 print('-'*80,)
 print('Pauli X using DRAG', '\t', 'PX')
 print('Pauli Y using DRAG', '\t', 'PY')
@@ -51,11 +51,14 @@ print('Pauli X exact', '\t\t', 'PXe')
 print('Pauli Y exact', '\t\t', 'PYe')
 print('Pauli Z', '\t\t', 'PZ')
 print('Hadamard', '\t\t', 'HD')
-print('PI12', '\t\t\t', '1->2 transition')
+print('PI12', '\t\t\t', '1->2 gate')
 print('\n')
+print('LIST OF AVAILABLE MULTI QUBIT GATES-')
+print('-'*80,)
 print('Controlled Z', '\t\t', 'CZ','\t\t', 'Format:Tar_Con=[[control, target]]')
 print('Controlled CZS', '\t\t', 'CCZS','\t\t', 'Format:Tar_Con=[[control, target1, target2, phi]]')
 print('Sqrt Controlled CZS', '\t', 'SCCZS','\t\t', 'Format:Tar_Con=[[control, target1, target2, phi]]')
+print('Simultaneous SWAP', '\t', 'SSWAP','\t\t', 'Format:Tar_Con=[[control, target1, target2]]')
 
 
 def create_system_Hamiltonian(num_qubits, num_levels, Paulis_gt, PI12_gt, CZ_gt, CCZS_gt, Alp, Diss=[],
@@ -65,6 +68,7 @@ def create_system_Hamiltonian(num_qubits, num_levels, Paulis_gt, PI12_gt, CZ_gt,
     This function creates the main bare Hamiltonian of the system.
     
     Arguments-
+    ---------------------    
     num_qubits      :   Number of qubits
     num_levels      :   Number of levels
     Paulis_gt       :   Single qubit gate time- Pauli X and Pauli Y
@@ -79,6 +83,7 @@ def create_system_Hamiltonian(num_qubits, num_levels, Paulis_gt, PI12_gt, CZ_gt,
     ZZ_stength      :   An array of ZZ strengths for each pair in ZZ_list. len(ZZ_list) = len(ZZ_strength)
     
     Returns-
+    ---------------------
     Ham             :   Bare system hamiltonian
     c_ops           :   List of collapse operators
     
@@ -190,9 +195,11 @@ def Pauli_times(angle):
     
         
     Arguments-
+    ---------------------    
     angle         :       Angle of the given Pauli gate
     
     Returns-
+    ---------------------
     gate time     :       Gate time for a given angle  
     
     '''

@@ -775,7 +775,7 @@ def pulse_hamiltonians(gate, TC, angle, npoints, measurement = False):
         
         # Simultaneous SWAP gate
         elif gate[i] == 'SSWAP':
-            Pulse_strength = (pi/sqrt(2)*gate_time_SSWAP) 
+            Pulse_strength = (pi/(sqrt(2)*gate_time_SSWAP)) 
             TE = gate_time-tlist
             Ome = 0.5*Pulse_strength * np.heaviside(TE, 0)
             
@@ -880,7 +880,8 @@ def Execute(Hamiltonian, c_ops, Info, Ini):
         
         H1, tlist = pulse_hamiltonians(gate, TC, angle, npoints)
         H2 = sum(H1) + Hamiltonian
-
+               
+        
         final_dm = mesolve(H2, Ini, tlist, c_ops, e_ops = [], options = Options(store_final_state=True, \
                                                                                 atol= 1e-10, rtol=1e-10))
         dm = final_dm.final_state

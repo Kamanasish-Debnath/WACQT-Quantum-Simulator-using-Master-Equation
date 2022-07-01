@@ -405,7 +405,7 @@ def PI12(target):
     Two = basis(Nlevels, 2)
     for i in range(Nqubits):
         if i==target:
-            oper.append(-1j*One*Two.dag())
+            oper.append(One*Two.dag())
         else:
             oper.append(qeye(Nlevels))
     opera = tensor(oper)

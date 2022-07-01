@@ -61,7 +61,7 @@ print('Sqrt Controlled CZS', '\t', 'SCCZS','\t\t', 'Format:Tar_Con=[[control, ta
 print('Simultaneous SWAP', '\t', 'SSWAP','\t\t', 'Format:Tar_Con=[[control, target1, target2]]')
 
 
-def create_system_Hamiltonian(num_qubits, num_levels, Paulis_gt, PI12_gt, CZ_gt, CCZS_gt, Alp, Diss=[],
+def create_system_Hamiltonian(num_qubits, num_levels, Paulis_gt, PI12_gt, CZ_gt, CCZS_gt, SSWAP_gt, Alp, Diss=[],
                               Deph =[], Texc=[], ZZ_list=[], ZZ_strength=[]):
     
     '''
@@ -75,6 +75,7 @@ def create_system_Hamiltonian(num_qubits, num_levels, Paulis_gt, PI12_gt, CZ_gt,
     PI12_gt         :   Gate time for 1->2 transition
     CZ_gt           :   Gate time for two qubit gate, namely Controlled Z gate
     CCZS_gt         :   Gate time for three qubit Controlled CZs gate. Refer PRX QUANTUM 2, 040348 (2021).
+    SSWAP_gt        :   Gate time for three qubit simulataneous SWAP gate. Refer PRX QUANTUM 2, 040348 (2021).
     Alp             :   Non linearity in each qubit (Presently only homogeneous qubits are supported)
     Diss            :   An array of qubit lifetime (in seconds) of each qubit. len(Diss) must be equal to Nqubits
     Deph            :   An array of coherence time (in seconds) of each qubit. len(Deph) must be equal to Nqubits
@@ -90,13 +91,15 @@ def create_system_Hamiltonian(num_qubits, num_levels, Paulis_gt, PI12_gt, CZ_gt,
     '''
     
     # Defining some global variables which will be used in all the functions
-    global Nqubits, Nlevels, Nqubits, gate_time_Paulis, gate_time_PI12, gate_time_CZ, gate_time_CCZS, Alpha, B, anihi_oper
+    global Nqubits, Nlevels, Nqubits, gate_time_Paulis, gate_time_PI12, gate_time_CZ, gate_time_CCZS, \
+    gate_time_SSWAP, Alpha, B, anihi_oper
 
 
     gate_time_Paulis = Paulis_gt
     gate_time_PI12 = PI12_gt
     gate_time_CZ = CZ_gt
     gate_time_CCZS = CCZS_gt
+    gate_time_SSWAP = SSWAP_gt
     Alpha = Alp
     Nlevels = num_levels
     Nqubits = num_qubits
@@ -509,7 +512,57 @@ def CCZS(control, target1, target2):
     
     return oper_lambda1, oper_lambda2
 
+
+
+
+def SSWAP(control, target1, target2):
+    '''
+    This function returns the simultaneous SWAP operator 
+    in the total hilbert space. Refer Fig.12 of PRX Quantum 2, 040348 (2021).
+    
+    Arguments-
+    ---------------------
+    control      :      control qubit
+    target1      :      target qubit 1 (middle qubit in PRX Quantum paper)
+    target2      :      target qubit 2 (right qubit in PRX Quantum paper)
+    
+    
+    Returns-
+    ---------------------
+    oper         :      Final operator in the total Hilbert space
+
+    '''
+    
+    l0 = basis(Nlevels, 0)
+    l1 = basis(Nlevels, 1)
+    oper_g1 = []
+    oper_g2 = []
+    for i in range(Nqubits):
+        if i == control:
+            oper_g1.append(l1*l0.dag() + l0*l1.dag())
+            oper_g2.append(l1*l0.dag() + l0*l1.dag())
             
+            
+        elif i == target1:
+            oper_g1.append(l0*l1.dag() + l1*l0.dag())
+            oper_g2.append(l0*l0.dag())            
+            
+            
+        elif i == target2:
+            oper_g1.append(l0*l0.dag())
+            oper_g2.append(l0*l1.dag() + l1*l0.dag())            
+            
+            
+        else:
+            oper_g1.append(qeye(Nlevels))
+            oper_g2.append(qeye(Nlevels))
+            
+
+    oper_g1 = tensor(oper_g1)
+    oper_g2 = tensor(oper_g2)
+    return oper_g1, oper_g2
+
+
         
 def virtual_Z_gate(dm, angle, target):
     

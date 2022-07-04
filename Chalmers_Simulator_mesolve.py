@@ -4,26 +4,13 @@ Postdoctoral Researcher
 Wallenberg Center for Quantum Technology (WACQT)
 Chalmers University of Technology
 Gothenburg, Sweden
-kamanasish.debnath@chalmers.se
-April 2022
+kamanasish.debnath@gmail.com
+March 2021 - September 2022
 
 
 
-This code is used to simulate quantum algorithms using the quantum processor at Chalmers.
-Internal functions and their usage are described as below-
-
-1. create_system_Hamiltonian(...)
-        This function returns the bare system Hamiltonian 1. 
-        and list of collapse operators. 
-                                                        
-2. DRAGX(..)      
-        This function returns the Pulse stength when using DRAG.
-        This is merged with (A + A.dag()) when applying PX gate. 
-        
-3. DRAGX_derivative(..):
-        This function returns the derivative of the pulse 
-
-
+This code is used to simulate quantum algorithms using the native gates
+available at Chalmers.
 
 '''
 
@@ -96,14 +83,14 @@ def create_system_Hamiltonian(num_qubits, num_levels, Paulis_gt, PI12_gt, CZ_gt,
 
 
     gate_time_Paulis = Paulis_gt
-    gate_time_PI12 = PI12_gt
-    gate_time_CZ = CZ_gt
-    gate_time_CCZS = CCZS_gt
-    gate_time_SSWAP = SSWAP_gt
-    Alpha = Alp
+    gate_time_PI12   = PI12_gt
+    gate_time_CZ     = CZ_gt
+    gate_time_CCZS   = CCZS_gt
+    gate_time_SSWAP  = SSWAP_gt
+    Alpha   = Alp
     Nlevels = num_levels
     Nqubits = num_qubits
-    B = pi/gate_time_Paulis
+    B       = pi/gate_time_Paulis
 
     anihi_oper= []
     
@@ -176,7 +163,6 @@ def create_system_Hamiltonian(num_qubits, num_levels, Paulis_gt, PI12_gt, CZ_gt,
             
             # The below line takes into account the fact that the dissipation 
             # rate from |2> ---> |1> is twice compared to |1> ---> |0>
-            
             c_ops.append(sqrt(1/(0.5*Diss[i]))*anihi21_oper[i])
             
     if len(Deph) != 0:
@@ -291,6 +277,13 @@ def DRAGY_derivative(t, ang):
 
 
 
+
+
+
+
+'''
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+'''
 def PauliX(target):   
     '''
     This function returns the (A+A.dag()) operator in the total Hilbert space
@@ -564,6 +557,12 @@ def SSWAP(control, target1, target2):
     oper_g1 = tensor(oper_g1)
     oper_g2 = tensor(oper_g2)
     return oper_g1, oper_g2
+
+
+
+'''
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+'''
 
 
         
@@ -883,7 +882,7 @@ def Execute(Hamiltonian, c_ops, Info, Ini):
                
         
         final_dm = mesolve(H2, Ini, tlist, c_ops, e_ops = [], options = Options(store_final_state=True, \
-                                                                                atol= 1e-10, rtol=1e-10))
+                                                                                atol= 1e-12, rtol=1e-12))
         dm = final_dm.final_state
         if 'HD' in gate:
             index_HD = np.where(gate == 'HD')[0]

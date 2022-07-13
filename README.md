@@ -21,7 +21,8 @@ Please refer to the example folder for more details. <br>
 Quantum gates modelled so far- <br>
 a) Single qubit gates- Hadamard, Pauli X, Pauli Y and virtual Pauli Z <br>
 b) Two qubit entangling gate - Controlled Z gate <br>
-(c) Three qubit entangling gate - Controlled CZS gate
+(c) Three qubit entangling gate - Controlled CZS gate <br>
+(d) Three qubit simultaneous SWAP gate - SSWAP
 
 Under construction- <br>
 a) iSWAP entangling gate <br>
